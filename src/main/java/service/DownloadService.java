@@ -28,16 +28,16 @@ public class DownloadService {
     public void getObject(String objectKey) {
         try {
             S3Object fullObject = amazonS3.getObject("dchristofolli", objectKey);
-            S3ObjectInputStream s3is = fullObject.getObjectContent();
+            S3ObjectInputStream content = fullObject.getObjectContent();
             makeDirectory();
             try (FileOutputStream fos = new FileOutputStream(
                     new File("Downloads" + File.separator + objectKey))) {
                 byte[] readBuffer = new byte[1024];
                 int readLength;
-                while ((readLength = s3is.read(readBuffer)) > 0) {
+                while ((readLength = content.read(readBuffer)) > 0) {
                     fos.write(readBuffer, 0, readLength);
                 }
-                s3is.close();
+                content.close();
             }
         } catch (AmazonServiceException | IOException e) {
             log.error(e.getMessage());

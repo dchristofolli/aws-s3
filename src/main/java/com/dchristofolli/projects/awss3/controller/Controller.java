@@ -19,10 +19,8 @@ public class Controller {
     private final DownloadService downloadService;
 
     @PostMapping(path = "/upload")
-    public ResponseEntity<String> uploadFile(@RequestPart(value = "file") final MultipartFile multipartFile) {
-        uploadService.uploadFile(multipartFile);
-        final String response = "[" + multipartFile.getOriginalFilename() + "] uploaded successfully.";
-        return new ResponseEntity<>(response, HttpStatus.OK);
+    public String uploadFile(@RequestPart(value = "file") final MultipartFile multipartFile) {
+        return uploadService.uploadFile(multipartFile);
     }
 
     @GetMapping("/list")

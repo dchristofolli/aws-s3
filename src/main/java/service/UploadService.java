@@ -24,7 +24,7 @@ public class UploadService {
     private final AmazonS3 amazonS3;
 
     @Async
-    public void uploadFile(final MultipartFile multipartFile) {
+    public String uploadFile(final MultipartFile multipartFile) {
         log.info("File upload in progress.");
         try {
             final File file = convertMultiPartFileToFile(multipartFile);
@@ -34,6 +34,7 @@ public class UploadService {
         } catch (final AmazonServiceException | IOException ex) {
             log.error("Error= {} while uploading file.", ex.getMessage());
         }
+        return "[" + multipartFile.getOriginalFilename() + "] uploaded successfully.";
     }
 
     private File convertMultiPartFileToFile(final MultipartFile multipartFile) {

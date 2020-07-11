@@ -15,7 +15,7 @@ public class Controller {
     private final DownloadService downloadService;
 
     @PostMapping(path = "/upload")
-    public void uploadFile(@RequestPart(value = "file") final MultipartFile multipartFile) {
+    public void uploadFile(@RequestPart(value = "file") MultipartFile multipartFile) {
         uploadService.uploadFile(multipartFile);
     }
 

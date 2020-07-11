@@ -1,6 +1,8 @@
 package com.dchristofolli.projects.awss3.controller;
 
 import com.amazonaws.services.s3.model.ListObjectsV2Result;
+import com.amazonaws.services.s3.model.S3Object;
+import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,5 +28,10 @@ public class Controller {
     @GetMapping("/list")
     public ListObjectsV2Result findAll(){
         return downloadService.listAll();
+    }
+
+    @GetMapping("/download/{objectKey}")
+    public void getObject(@PathVariable String objectKey){
+        downloadService.getObject(objectKey);
     }
 }

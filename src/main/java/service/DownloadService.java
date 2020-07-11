@@ -7,6 +7,7 @@ import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -21,17 +22,23 @@ import java.nio.file.Path;
 public class DownloadService {
     private final AmazonS3 amazonS3;
 
+    @Value("${aws.s3.bucket}")
+    private final String bucket;
+
+    @Value("${download_path}")
+    private final String downloadPath;
+
     public ListObjectsV2Result listAll() {
-        return amazonS3.listObjectsV2("dchristofolli");
+        return amazonS3.listObjectsV2(bucket);
     }
 
     public void getObject(String objectKey) {
         try {
-            S3Object fullObject = amazonS3.getObject("dchristofolli", objectKey);
+            S3Object fullObject = amazonS3.getObject(bucket, objectKey);
             S3ObjectInputStream content = fullObject.getObjectContent();
             makeDirectory();
             try (FileOutputStream fos = new FileOutputStream(
-                    new File("Downloads" + File.separator + objectKey))) {
+                    new File(downloadPath + File.separator + objectKey))) {
                 byte[] readBuffer = new byte[1024];
                 int readLength;
                 while ((readLength = content.read(readBuffer)) > 0) {
@@ -46,7 +53,7 @@ public class DownloadService {
 
     private void makeDirectory() {
         try {
-            Files.createDirectories(Path.of("Downloads"));
+            Files.createDirectories(Path.of(downloadPath));
         } catch (IOException e) {
             e.printStackTrace();
         }

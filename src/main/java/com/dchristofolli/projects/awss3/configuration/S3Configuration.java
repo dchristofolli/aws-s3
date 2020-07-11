@@ -24,7 +24,12 @@ public class S3Configuration {
     @Value("${aws.s3.region}")
     private String region;
 
-    @Bean
+    @Value("${aws.s3.bucket}")
+    private String bucket;
+
+    @Value("${download_path}")
+    private String downloadPath;
+
     public AmazonS3 getAmazonS3Cient() {
         final BasicAWSCredentials basicAWSCredentials = new BasicAWSCredentials(accessKeyId, secretAccessKey);
         return AmazonS3ClientBuilder
@@ -35,12 +40,12 @@ public class S3Configuration {
     }
 
     @Bean
-    public UploadService uploadService(){
-        return new UploadService(getAmazonS3Cient());
+    public UploadService uploadService() {
+        return new UploadService(getAmazonS3Cient(), bucket);
     }
 
     @Bean
-    public DownloadService downloadService(){
-        return new DownloadService(getAmazonS3Cient());
+    public DownloadService downloadService() {
+        return new DownloadService(getAmazonS3Cient(), bucket, downloadPath);
     }
 }

@@ -1,13 +1,14 @@
-package service;
+package com.dchristofolli.projects.awss3.service;
 
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.ListObjectsV2Result;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
+import com.dchristofolli.projects.awss3.exception.ApiException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -15,6 +16,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @AllArgsConstructor
@@ -28,11 +31,19 @@ public class DownloadService {
     @Value("${download_path}")
     private final String downloadPath;
 
-    public ListObjectsV2Result listAll() {
-        return amazonS3.listObjectsV2(bucket);
+    public List<String> listAll() {
+        List<String> nameList = new ArrayList<>();
+        amazonS3.listObjectsV2(bucket)
+                .getObjectSummaries()
+                .forEach(file -> nameList.add(file.getKey()));
+        if (nameList.isEmpty())
+            throw new ApiException("Empty", HttpStatus.NOT_FOUND);
+        return nameList;
     }
 
     public void getObject(String objectKey) {
+        if (!amazonS3.doesObjectExist(bucket, objectKey))
+            throw new ApiException("File not exists", HttpStatus.NOT_FOUND);
         try {
             S3Object fullObject = amazonS3.getObject(bucket, objectKey);
             S3ObjectInputStream content = fullObject.getObjectContent();
@@ -58,4 +69,5 @@ public class DownloadService {
             e.printStackTrace();
         }
     }
+
 }

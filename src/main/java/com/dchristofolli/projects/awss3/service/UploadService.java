@@ -1,4 +1,4 @@
-package service;
+package com.dchristofolli.projects.awss3.service;
 
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.AmazonS3;

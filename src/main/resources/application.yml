@@ -1,7 +1,10 @@
 aws:
-  access_key:
-  secret_access_key:
+  access_key: AKIAJSBC3W5VVZLA2GEQ
+  secret_access_key: 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
   s3:
     bucket: dchristofolli
     region: sa-east-1
 download_path: Downloads
+server:
+  error:
+    include-stacktrace: never

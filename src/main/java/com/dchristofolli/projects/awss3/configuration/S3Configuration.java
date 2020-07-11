@@ -9,8 +9,6 @@ import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import service.DownloadService;
-import service.UploadService;
 
 @Configuration
 @Getter
@@ -30,6 +28,7 @@ public class S3Configuration {
     @Value("${download_path}")
     private String downloadPath;
 
+    @Bean
     public AmazonS3 getAmazonS3Cient() {
         final BasicAWSCredentials basicAWSCredentials = new BasicAWSCredentials(accessKeyId, secretAccessKey);
         return AmazonS3ClientBuilder
@@ -40,12 +39,7 @@ public class S3Configuration {
     }
 
     @Bean
-    public UploadService uploadService() {
-        return new UploadService(getAmazonS3Cient(), bucket);
-    }
-
-    @Bean
-    public DownloadService downloadService() {
-        return new DownloadService(getAmazonS3Cient(), bucket, downloadPath);
+    public String string(){
+        return "";
     }
 }

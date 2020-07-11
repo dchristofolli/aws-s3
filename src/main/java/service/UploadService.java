@@ -28,7 +28,7 @@ public class UploadService {
         log.info("File upload in progress.");
         try {
             final File file = convertMultiPartFileToFile(multipartFile);
-            uploadFileToS3Bucket("dchristofolli", file);
+            uploadFileToS3Bucket(file);
             log.info("File upload is completed.");
             Files.delete(Path.of(String.valueOf(file)));
         } catch (final AmazonServiceException | IOException ex) {
@@ -46,10 +46,10 @@ public class UploadService {
         return file;
     }
 
-    private void uploadFileToS3Bucket(final String bucketName, final File file) {
+    private void uploadFileToS3Bucket(final File file) {
         final String uniqueFileName = LocalDateTime.now() + "_" + file.getName();
         log.info("Uploading file with name= " + uniqueFileName);
-        final PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName, uniqueFileName, file);
+        final PutObjectRequest putObjectRequest = new PutObjectRequest("dchristofolli", uniqueFileName, file);
         amazonS3.putObject(putObjectRequest);
     }
 }

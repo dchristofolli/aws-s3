@@ -9,6 +9,7 @@ import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import service.DownloadService;
 import service.UploadService;
 
 @Configuration
@@ -36,5 +37,10 @@ public class S3Configuration {
     @Bean
     public UploadService uploadService(){
         return new UploadService(getAmazonS3Cient());
+    }
+
+    @Bean
+    public DownloadService downloadService(){
+        return new DownloadService(getAmazonS3Cient());
     }
 }

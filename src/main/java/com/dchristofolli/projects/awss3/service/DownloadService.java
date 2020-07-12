@@ -48,15 +48,7 @@ public class DownloadService {
             S3Object fullObject = amazonS3.getObject(bucket, objectKey);
             S3ObjectInputStream content = fullObject.getObjectContent();
             makeDirectory();
-            try (FileOutputStream fos = new FileOutputStream(
-                    new File(downloadPath + File.separator + objectKey))) {
-                byte[] readBuffer = new byte[1024];
-                int readLength;
-                while ((readLength = content.read(readBuffer)) > 0) {
-                    fos.write(readBuffer, 0, readLength);
-                }
-                content.close();
-            }
+            makeFile(objectKey, content);
         } catch (AmazonServiceException | IOException e) {
             log.error(e.getMessage());
         }
@@ -70,4 +62,15 @@ public class DownloadService {
         }
     }
 
+    private void makeFile(String objectKey, S3ObjectInputStream content) throws IOException {
+        try (FileOutputStream fos = new FileOutputStream(
+                new File(downloadPath + File.separator + objectKey))) {
+            byte[] readBuffer = new byte[1024];
+            int readLength;
+            while ((readLength = content.read(readBuffer)) > 0) {
+                fos.write(readBuffer, 0, readLength);
+            }
+            content.close();
+        }
+    }
 }

@@ -1,7 +1,6 @@
 package com.dchristofolli.projects.awss3.service;
 
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.VersionListing;
 import com.dchristofolli.projects.awss3.exception.BadRequestException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,4 +31,3 @@ public class AdminService {
                 .forEach(file -> deleteFile(file.getKey()));
     }
 }
-

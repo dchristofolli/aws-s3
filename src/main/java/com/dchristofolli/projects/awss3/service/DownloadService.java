@@ -2,9 +2,12 @@ package com.dchristofolli.projects.awss3.service;
 
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.ListObjectsV2Result;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.dchristofolli.projects.awss3.exception.NotFoundException;
+import com.dchristofolli.projects.awss3.model.FileModel;
+import com.dchristofolli.projects.awss3.model.ResponseModel;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,6 +21,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 @AllArgsConstructor
@@ -31,14 +35,29 @@ public class DownloadService {
     @Value("${download_path}")
     private final String downloadPath;
 
-    public List<String> listAll() {
-        List<String> nameList = new ArrayList<>();
-        amazonS3.listObjectsV2(bucket)
-                .getObjectSummaries()
-                .forEach(file -> nameList.add(file.getKey()));
-        if (nameList.isEmpty())
-            throw new NotFoundException("Empty", HttpStatus.NOT_FOUND);
-        return nameList;
+    public ResponseModel listAll() {
+        ListObjectsV2Result result = amazonS3.listObjectsV2(bucket);
+        List<FileModel> fileList = new ArrayList<>();
+        AtomicInteger totalFileSize = new AtomicInteger();
+        int keyCount = result.getKeyCount();
+        getFileProperties(result, fileList, totalFileSize);
+        return ResponseModel.builder()
+                .bucketName(result.getBucketName())
+                .fileModelList(fileList)
+                .quantity(keyCount)
+                .totalFileSize(totalFileSize.get() / 1024 + " kb")
+                .build();
+    }
+
+    private void getFileProperties(ListObjectsV2Result result, List<FileModel> fileList, AtomicInteger totalFileSize) {
+        result.getObjectSummaries()
+                .forEach(file -> {
+                    fileList.add(FileModel.builder()
+                            .fileName(file.getKey())
+                            .size(file.getSize()/1024)
+                            .build());
+                    totalFileSize.addAndGet(Math.toIntExact(file.getSize()));
+                });
     }
 
     public void getObject(String objectKey) {

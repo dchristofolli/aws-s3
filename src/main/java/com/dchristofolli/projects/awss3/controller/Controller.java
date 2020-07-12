@@ -1,5 +1,6 @@
 package com.dchristofolli.projects.awss3.controller;
 
+import com.dchristofolli.projects.awss3.model.ResponseModel;
 import com.dchristofolli.projects.awss3.service.AdminService;
 import com.dchristofolli.projects.awss3.service.DownloadService;
 import com.dchristofolli.projects.awss3.service.UploadService;
@@ -7,8 +8,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -25,7 +24,7 @@ public class Controller {
     }
 
     @GetMapping("/list")
-    public List<String> findAll() {
+    public ResponseModel findAll() {
         return downloadService.listAll();
     }
 

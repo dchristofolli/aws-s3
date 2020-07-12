@@ -4,7 +4,7 @@ import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
-import com.dchristofolli.projects.awss3.exception.ApiException;
+import com.dchristofolli.projects.awss3.exception.NotFoundException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,13 +37,13 @@ public class DownloadService {
                 .getObjectSummaries()
                 .forEach(file -> nameList.add(file.getKey()));
         if (nameList.isEmpty())
-            throw new ApiException("Empty", HttpStatus.NOT_FOUND);
+            throw new NotFoundException("Empty", HttpStatus.NOT_FOUND);
         return nameList;
     }
 
     public void getObject(String objectKey) {
         if (!amazonS3.doesObjectExist(bucket, objectKey))
-            throw new ApiException("File not exists", HttpStatus.NOT_FOUND);
+            throw new NotFoundException("File not exists", HttpStatus.NOT_FOUND);
         try {
             S3Object fullObject = amazonS3.getObject(bucket, objectKey);
             S3ObjectInputStream content = fullObject.getObjectContent();

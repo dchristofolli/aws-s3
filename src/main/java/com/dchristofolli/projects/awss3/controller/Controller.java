@@ -8,7 +8,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.util.List;
 
 @RestController
@@ -23,11 +22,6 @@ public class Controller {
     @ResponseStatus(HttpStatus.CREATED)
     public void uploadFile(@RequestPart(value = "file") MultipartFile multipartFile) {
         uploadService.uploadFile(multipartFile);
-    }
-
-    @PostMapping(path = "/multi-upload")
-    public void multiFileUpload(List<File> fileList) {
-        uploadService.multipleFileUpload(fileList);
     }
 
     @GetMapping("/list")

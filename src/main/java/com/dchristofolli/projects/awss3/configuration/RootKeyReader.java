@@ -1,6 +1,7 @@
 package com.dchristofolli.projects.awss3.configuration;
 
-import com.dchristofolli.projects.awss3.exception.ApiException;
+import com.dchristofolli.projects.awss3.exception.BadRequestException;
+import com.dchristofolli.projects.awss3.exception.NotFoundException;
 import com.opencsv.bean.CsvToBeanBuilder;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -16,6 +17,7 @@ import java.util.Objects;
 
 @Slf4j
 @Component
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class RootKeyReader {
     public static RootKeyModel getRootKey() {
         Reader reader = null;
@@ -30,6 +32,6 @@ public class RootKeyReader {
                 .build()
                 .parse().stream()
                 .findFirst()
-                .orElseThrow(() -> new ApiException("File not found", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new NotFoundException("File not found", HttpStatus.NOT_FOUND));
     }
 }

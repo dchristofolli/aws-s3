@@ -17,11 +17,7 @@ import static com.dchristofolli.projects.awss3.configuration.RootKeyReader.getRo
 @Configuration
 @Getter
 public class S3Configuration {
-    
-//    @Value("${aws.access_key}")
     private final String accessKeyId = getRootKey().getAWSAccessKeyId();
-
-//    @Value("${aws.secret_access_key}")
     private final String secretAccessKey = getRootKey().getAWSSecretKey();
 
     @Value("${aws.s3.region}")

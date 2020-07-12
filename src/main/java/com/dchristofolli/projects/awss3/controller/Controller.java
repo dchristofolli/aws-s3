@@ -8,9 +8,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import reactor.core.publisher.Mono;
 
-@RestController
 @RequiredArgsConstructor
+@RestController
 @RequestMapping("/files")
 public class Controller {
     private final UploadService uploadService;
@@ -19,8 +20,8 @@ public class Controller {
 
     @PostMapping(path = "/upload")
     @ResponseStatus(HttpStatus.CREATED)
-    public void uploadFile(@RequestPart(value = "file") MultipartFile multipartFile) {
-        uploadService.uploadFile(multipartFile);
+    public Mono<Void> uploadFile(@RequestPart(value = "file") Mono<MultipartFile> multipartFile) {
+        return uploadService.uploadFile(multipartFile);
     }
 
     @GetMapping("/list")

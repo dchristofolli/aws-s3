@@ -1,8 +1,5 @@
 package com.dchristofolli.projects.awss3.service;
 
-import com.amazonaws.AmazonServiceException;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.dchristofolli.projects.awss3.exception.BadRequestException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import reactor.core.publisher.Mono;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -23,25 +21,30 @@ import java.util.Objects;
 @Service
 @AllArgsConstructor
 public class UploadService {
-    private final AmazonS3 amazonS3;
+//    private final AmazonS3 amazonS3;
 
     @Value("${aws.s3.bucket}")
     private final String bucket;
 
-    @Async
-    public void uploadFile(final MultipartFile multipartFile) {
-        if(multipartFile.isEmpty())
-            throw new BadRequestException("Insert a file", HttpStatus.BAD_REQUEST);
-        log.info("File upload in progress.");
-        try {
-            final File file = convertMultiPartFileToFile(multipartFile);
-            uploadFileToS3Bucket(file);
-            log.info("File upload is completed.");
-            Files.delete(Path.of(String.valueOf(file)));
-        } catch (final AmazonServiceException | IOException ex) {
-            log.error("Error= {} while uploading file.", ex.getMessage());
-        }
-    }
+//    public Mono<Void> uploadFile(Mono<MultipartFile> multipartFile) {
+//        return multipartFile
+//                .flatMap(p -> )
+//    }
+
+//    @Async
+//    public Mono<Void> uploadFile(final MultipartFile multipartFile) {
+//        if(multipartFile.isEmpty())
+//            throw new BadRequestException("Insert a file", HttpStatus.BAD_REQUEST);
+//        log.info("File upload in progress.");
+//        try {
+//            final File file = convertMultiPartFileToFile(multipartFile);
+//            uploadFileToS3Bucket(file);
+//            log.info("File upload is completed.");
+//            Files.delete(Path.of(String.valueOf(file)));
+//        } catch (final AmazonServiceException | IOException ex) {
+//            log.error("Error= {} while uploading file.", ex.getMessage());
+//        }
+//    }
 
 //    public void multipleFileUpload(List<File> fileList) {
 //        if (fileList.size() > 1048576)
@@ -72,10 +75,10 @@ public class UploadService {
         return file;
     }
 
-    private void uploadFileToS3Bucket(final File file) {
-        amazonS3.putObject(new PutObjectRequest(
-                bucket,
-                file.getName(),
-                file));
-    }
+//    private void uploadFileToS3Bucket(final File file) {
+//        amazonS3.putObject(new PutObjectRequest(
+//                bucket,
+//                file.getName(),
+//                file));
+//    }
 }

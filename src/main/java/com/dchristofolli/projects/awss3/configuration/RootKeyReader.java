@@ -1,6 +1,5 @@
 package com.dchristofolli.projects.awss3.configuration;
 
-import com.dchristofolli.projects.awss3.exception.BadRequestException;
 import com.dchristofolli.projects.awss3.exception.NotFoundException;
 import com.opencsv.bean.CsvToBeanBuilder;
 import lombok.AccessLevel;

@@ -1,7 +1,6 @@
 aws:
   s3:
     bucket: dchristofolli
-    region: sa-east-1
 download_path: Downloads
 server:
   error:

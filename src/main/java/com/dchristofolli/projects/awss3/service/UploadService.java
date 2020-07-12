@@ -9,6 +9,7 @@ import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -29,14 +30,16 @@ public class UploadService {
     @Value("${aws.s3.bucket}")
     private final String bucket;
 
+    @Async
     public void uploadFile(final MultipartFile multipartFile) {
-        log.info(multipartFile.getSize() / 1024 + " kb");
+        log.info("File upload in progress.");
         try {
             final File file = convertMultiPartFileToFile(multipartFile);
             uploadFileToS3Bucket(file);
+            log.info("File upload is completed.");
             Files.delete(Path.of(String.valueOf(file)));
         } catch (final AmazonServiceException | IOException ex) {
-            log.error(ex.getMessage());
+            log.error("Error= {} while uploading file.", ex.getMessage());
         }
     }
 

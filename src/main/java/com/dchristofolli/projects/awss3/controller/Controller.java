@@ -1,6 +1,5 @@
 package com.dchristofolli.projects.awss3.controller;
 
-import com.amazonaws.services.s3.model.ListObjectsV2Result;
 import com.dchristofolli.projects.awss3.service.AdminService;
 import com.dchristofolli.projects.awss3.service.DownloadService;
 import com.dchristofolli.projects.awss3.service.UploadService;
@@ -22,12 +21,12 @@ public class Controller {
 
     @PostMapping(path = "/upload")
     @ResponseStatus(HttpStatus.CREATED)
-    public void uploadFile(MultipartFile multipartFile) {
+    public void uploadFile(@RequestPart(value = "file") MultipartFile multipartFile) {
         uploadService.uploadFile(multipartFile);
     }
 
     @PostMapping(path = "/multi-upload")
-    public void multiFileUpload( List<File> fileList) {
+    public void multiFileUpload(List<File> fileList) {
         uploadService.multipleFileUpload(fileList);
     }
 
@@ -49,7 +48,7 @@ public class Controller {
 
     @DeleteMapping("/delete")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteAll(){
+    public void deleteAll() {
         adminService.deleteAllFiles();
     }
 }

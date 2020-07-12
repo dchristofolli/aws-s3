@@ -5,19 +5,24 @@ import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import static com.dchristofolli.projects.awss3.configuration.RootKeyReader.getRootKey;
+
 @Configuration
 @Getter
 public class S3Configuration {
-    @Value("${aws.access_key}")
-    private String accessKeyId;
+    
+//    @Value("${aws.access_key}")
+    private final String accessKeyId = getRootKey().getAWSAccessKeyId();
 
-    @Value("${aws.secret_access_key}")
-    private String secretAccessKey;
+//    @Value("${aws.secret_access_key}")
+    private final String secretAccessKey = getRootKey().getAWSSecretKey();
 
     @Value("${aws.s3.region}")
     private String region;

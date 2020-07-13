@@ -2,13 +2,13 @@ package com.dchristofolli.projects.awss3.configuration;
 
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import software.amazon.awssdk.regions.Region;
 
 import static com.dchristofolli.projects.awss3.configuration.RootKeyReader.getRootKey;
 
-@Configuration
 @Data
+@ConfigurationProperties("aws.s3")
 public class S3ConfigurationProperties {
     private Region region = Region.SA_EAST_1;
 

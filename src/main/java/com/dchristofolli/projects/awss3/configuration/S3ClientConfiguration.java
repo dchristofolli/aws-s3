@@ -18,6 +18,7 @@ import java.time.Duration;
 @Configuration
 @EnableConfigurationProperties(S3ConfigurationProperties.class)
 public class S3ClientConfiguration {
+
     @Bean
     public S3AsyncClient s3client(S3ConfigurationProperties s3props,
                                   AwsCredentialsProvider credentialsProvider) {
@@ -40,9 +41,13 @@ public class S3ClientConfiguration {
     public AwsCredentialsProvider awsCredentialsProvider(S3ConfigurationProperties s3props) {
         if (StringUtils.isBlank(s3props.getAccessKeyId())) {
             return DefaultCredentialsProvider.create();
-        }
-        else {
+        } else {
             return () -> AwsBasicCredentials.create(s3props.getAccessKeyId(), s3props.getSecretAccessKey());
         }
+    }
+
+    @Bean
+    public String string() {
+        return "";
     }
 }

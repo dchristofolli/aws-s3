@@ -1,10 +1,11 @@
 package com.dchristofolli.projects.awss3.controller;
 
-import com.dchristofolli.projects.awss3.model.ResponseModel;
 import com.dchristofolli.projects.awss3.service.UploadService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import reactor.core.publisher.Mono;
 
 @RequiredArgsConstructor
 @RestController
@@ -12,11 +13,11 @@ import org.springframework.web.bind.annotation.*;
 public class Controller {
     private final UploadService uploadService;
 
-//    @PostMapping(path = "/upload")
-//    @ResponseStatus(HttpStatus.CREATED)
-//    public Mono<Void> uploadFile(@RequestPart(value = "file") Mono<MultipartFile> multipartFile) {
-//        return uploadService.uploadFile(multipartFile);
-//    }
+    @PostMapping(path = "/upload")
+    @ResponseStatus(HttpStatus.CREATED)
+    public Mono<Void> uploadFile(@RequestPart(value = "file") Mono<MultipartFile> multipartFile) {
+        return uploadService.uploadFile(multipartFile);
+    }
 
 //    @GetMapping("/list")
 //    public ResponseModel findAll() {

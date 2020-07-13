@@ -8,7 +8,8 @@ A ideia é que seja possível fazer uploads, downloads e verificações em um bu
 Java 11, Spring boot(WebFlux), Gradle e OpenCSV
 
 ##### Ambiente
-Para testar esse sistema, é necessário que o arquivo rootkey.csv esteja na raiz do projeto
+Para testar esse sistema, é necessário que o arquivo rootkey.csv (arquivo que contém o access key <br>
+e o secret key da AWS) esteja na raiz do projeto
 
 Exemplo de rootkey.csv:<br>
 AWSAccessKeyId;AWSSecretKey<br>

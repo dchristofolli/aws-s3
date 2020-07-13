@@ -18,6 +18,6 @@ POST localhost:8080/files/upload
 
 A requisição deve ser feita pelo Postman(ou outra coisa parecida). <br>
 Body-type: form-data<br>
-Key: "file", marcar a opção File
+Key: "file", marcar a opção File<br>
 Value: Selecionar o arquivo que será upado para o S3.
  

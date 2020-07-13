@@ -12,7 +12,9 @@ Para testar esse sistema, é necessário que o arquivo rootkey.csv esteja na rai
 
 Exemplo de rootkey.csv:<br>
 AWSAccessKeyId;AWSSecretKey<br>
-<ACCESS-KEY>;<SECRET-KEY><br>
+ACCESS-KEY;SECRET-KEY<br>
+
+
 ##### Endpoint
 POST localhost:8080/files/upload
 

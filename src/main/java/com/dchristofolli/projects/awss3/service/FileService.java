@@ -1,10 +1,12 @@
 package com.dchristofolli.projects.awss3.service;
 
+import com.dchristofolli.projects.awss3.exception.NotFoundException;
 import com.dchristofolli.projects.awss3.model.FileModel;
 import com.dchristofolli.projects.awss3.model.ResponseModel;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
@@ -23,6 +25,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 @Slf4j
 @Service
@@ -62,7 +65,7 @@ public class FileService {
 
     public void makeDirectory(String path) {
         try {
-            if(!Files.exists(Paths.get(path)))
+            if (!Files.exists(Paths.get(path)))
                 Files.createDirectory(Path.of(path)).toAbsolutePath();
         } catch (IOException e) {
             e.printStackTrace();
@@ -79,7 +82,7 @@ public class FileService {
         return Mono.just(ResponseModel
                 .builder()
                 .bucketName(bucket)
-                .fileModelList(fileList)
+                .keys(fileList)
                 .totalFileSize(fileList.stream()
                         .mapToInt(FileModel::getSize).sum() + " kb")
                 .quantity(keyCount).build());
@@ -104,9 +107,23 @@ public class FileService {
 
     public Mono<Void> getObject(String objectKey) {
         makeDirectory(downloadPath);
-        return Mono.just(asyncClient.getObject(GetObjectRequest.builder()
+        return Mono.just(
+                asyncClient.getObject(GetObjectRequest.builder()
+                        .bucket(bucket)
+                        .key(objectKey)
+                        .build(), Paths.get(downloadPath + File.separator + objectKey)))
+                .then();
+    }
+
+    public Mono<Void> deleteFile(String fileName) {
+        return Mono.just(asyncClient.deleteObject(DeleteObjectRequest.builder()
                 .bucket(bucket)
-                .key(objectKey)
-                .build(), Paths.get(downloadPath + File.separator + objectKey))).then();
+                .key(fileName)
+                .build()))
+                .then();
+    }
+
+    public Mono<Void> deleteAllFiles() {
+        return null;
     }
 }

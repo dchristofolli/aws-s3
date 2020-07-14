@@ -29,16 +29,16 @@ public class Controller {
     public Mono<Void> downloadFile(@PathVariable String objectKey) {
         return fileService.getObject(objectKey);
     }
-//
-//    @DeleteMapping("delete/{fileName}")
-//    @ResponseStatus(HttpStatus.NO_CONTENT)
-//    public void deleteFile(@PathVariable String fileName) {
-//        adminService.deleteFile(fileName);
-//    }
-//
-//    @DeleteMapping("/delete")
-//    @ResponseStatus(HttpStatus.NO_CONTENT)
-//    public void deleteAll() {
-//        adminService.deleteAllFiles();
-//    }
+
+    @DeleteMapping("delete/{fileName}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public Mono<Void> deleteFile(@PathVariable String fileName) {
+        return fileService.deleteFile(fileName);
+    }
+
+    @DeleteMapping("/delete")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public Mono<Void> deleteAll() {
+        return fileService.deleteAllFiles();
+    }
 }

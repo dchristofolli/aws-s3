@@ -19,9 +19,9 @@ import software.amazon.awssdk.services.s3.model.PutObjectResponse;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
 @Service
@@ -34,10 +34,13 @@ public class FileService {
 
 
     public Mono<Void> uploadFile(final Mono<FilePart> filePartMono) {
-        String fileName = UUID.randomUUID().toString();
+        AtomicReference<String> fileName = new AtomicReference<>();
         return filePartMono
-                .map(filePart -> filePart.transferTo(new File(fileName)))
-                .map(v -> Mono.fromFuture(uploadFileToS3Bucket(new File(fileName))))
+                .map(filePart -> {
+                    fileName.set(filePart.filename());
+                    return filePart.transferTo(new File(filePart.filename()));
+                })
+                .map(v -> Mono.fromFuture(uploadFileToS3Bucket(new File(fileName.get()))))
                 .subscribeOn(Schedulers.boundedElastic())
                 .then();
     }

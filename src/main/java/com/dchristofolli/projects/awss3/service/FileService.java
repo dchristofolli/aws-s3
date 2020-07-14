@@ -1,22 +1,21 @@
 package com.dchristofolli.projects.awss3.service;
 
-import com.dchristofolli.projects.awss3.model.ResponseModel;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 import software.amazon.awssdk.core.async.AsyncRequestBody;
 import software.amazon.awssdk.services.s3.S3AsyncClient;
-import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
-import software.amazon.awssdk.services.s3.model.PutObjectRequest;
-import software.amazon.awssdk.services.s3.model.PutObjectResponse;
+import software.amazon.awssdk.services.s3.model.*;
 
 import java.io.File;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -44,11 +43,12 @@ public class FileService {
                 .build(), AsyncRequestBody.fromFile(file));
     }
 
-    public Mono<ResponseModel> listAll() {
-        ListObjectsV2Request request = ListObjectsV2Request.builder()
-                .bucket(bucket)
-                .build();
-//        return asyncClient.listObjectsV2(request).complete();
-        return null;
+    public Flux<String> listAll() {
+        return Flux.just(asyncClient.listObjectsV2(ListObjectsV2Request.builder()
+                .bucket(bucket).build())
+                .thenApplyAsync(ListObjectsV2Response::contents)
+                .thenApplyAsync(s3Objects -> s3Objects.parallelStream()
+                        .map(S3Object::key))
+                .join().collect(Collectors.joining("\n")));
     }
 }

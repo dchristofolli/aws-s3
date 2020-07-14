@@ -17,6 +17,9 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectResponse;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -32,13 +35,17 @@ public class FileService {
     @Value("${aws.s3.bucket}")
     private final String bucket;
 
+    @Value("${path.temp}")
+    private final String temp;
+
 
     public Mono<Void> uploadFile(final Mono<FilePart> filePartMono) {
+        makeDirectory();
         AtomicReference<String> fileName = new AtomicReference<>();
         return filePartMono
                 .map(filePart -> {
-                    fileName.set(filePart.filename());
-                    return filePart.transferTo(new File(filePart.filename()));
+                    fileName.set(temp + File.separator + filePart.filename());
+                    return filePart.transferTo(new File(temp + File.separator + filePart.filename()));
                 })
                 .map(v -> Mono.fromFuture(uploadFileToS3Bucket(new File(fileName.get()))))
                 .subscribeOn(Schedulers.boundedElastic())
@@ -50,6 +57,14 @@ public class FileService {
                 .bucket(bucket)
                 .key(file.getName())
                 .build(), AsyncRequestBody.fromFile(file));
+    }
+
+    public void makeDirectory() {
+        try {
+            Files.createDirectory(Path.of(temp)).toAbsolutePath();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public Mono<ResponseModel> listAll() {

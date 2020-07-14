@@ -1,7 +1,9 @@
 aws:
   s3:
     bucket: dchristofolli
-download_path: Downloads
+path:
+  temp: temp_files
+  downloads: downloads
 server:
   error:
     include-stacktrace: never

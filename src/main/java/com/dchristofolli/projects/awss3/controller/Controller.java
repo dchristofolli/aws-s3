@@ -3,8 +3,8 @@ package com.dchristofolli.projects.awss3.controller;
 import com.dchristofolli.projects.awss3.service.UploadService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Mono;
 
 @RequiredArgsConstructor
@@ -15,8 +15,8 @@ public class Controller {
 
     @PostMapping(path = "/upload")
     @ResponseStatus(HttpStatus.CREATED)
-    public Mono<Void> uploadFile(@RequestPart(value = "file") Mono<MultipartFile> multipartFile) {
-        return uploadService.uploadFile(multipartFile);
+    public Mono<Void> uploadFile(@RequestPart(value = "file") Mono<FilePart> filePartMono) {
+        return uploadService.uploadFile(filePartMono);
     }
 
 //    @GetMapping("/list")

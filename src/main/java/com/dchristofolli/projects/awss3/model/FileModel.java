@@ -9,5 +9,5 @@ import lombok.Data;
 @Data
 public class FileModel {
     private String fileName;
-    private long size;
+    private Integer size;
 }

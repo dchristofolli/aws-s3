@@ -1,11 +1,11 @@
 package com.dchristofolli.projects.awss3.controller;
 
+import com.dchristofolli.projects.awss3.model.ResponseModel;
 import com.dchristofolli.projects.awss3.service.FileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.web.bind.annotation.*;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RequiredArgsConstructor
@@ -21,13 +21,13 @@ public class Controller {
     }
 
     @GetMapping("/list")
-    public Flux<String> findAll() {
+    public Mono<ResponseModel> findAll() {
         return fileService.listAll();
     }
-//
+
 //    @GetMapping("/download/{objectKey}")
-//    public void downloadFile(@PathVariable String objectKey) {
-//        downloadService.getObject(objectKey);
+//    public Mono<Void> downloadFile(@PathVariable String objectKey) {
+//        return fileService.getObject(objectKey);
 //    }
 //
 //    @DeleteMapping("delete/{fileName}")

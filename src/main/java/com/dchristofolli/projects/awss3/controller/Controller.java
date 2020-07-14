@@ -25,10 +25,10 @@ public class Controller {
         return fileService.listAll();
     }
 
-//    @GetMapping("/download/{objectKey}")
-//    public Mono<Void> downloadFile(@PathVariable String objectKey) {
-//        return fileService.getObject(objectKey);
-//    }
+    @GetMapping("/download/{objectKey}")
+    public Mono<Void> downloadFile(@PathVariable String objectKey) {
+        return fileService.getObject(objectKey);
+    }
 //
 //    @DeleteMapping("delete/{fileName}")
 //    @ResponseStatus(HttpStatus.NO_CONTENT)

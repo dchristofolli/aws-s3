@@ -11,15 +11,13 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 import software.amazon.awssdk.core.async.AsyncRequestBody;
 import software.amazon.awssdk.services.s3.S3AsyncClient;
-import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
-import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
-import software.amazon.awssdk.services.s3.model.PutObjectRequest;
-import software.amazon.awssdk.services.s3.model.PutObjectResponse;
+import software.amazon.awssdk.services.s3.model.*;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -38,16 +36,19 @@ public class FileService {
     @Value("${path.temp}")
     private final String temp;
 
+    @Value("${path.downloads}")
+    private final String downloadPath;
+
 
     public Mono<Void> uploadFile(final Mono<FilePart> filePartMono) {
-        makeDirectory();
+        makeDirectory(temp);
         AtomicReference<String> fileName = new AtomicReference<>();
         return filePartMono
                 .map(filePart -> {
-                    fileName.set(temp + File.separator + filePart.filename());
+                    fileName.set(temp + File.separator + (filePart.filename()));
                     return filePart.transferTo(new File(temp + File.separator + filePart.filename()));
                 })
-                .map(v -> Mono.fromFuture(uploadFileToS3Bucket(new File(fileName.get()))))
+                .map(v -> Mono.fromFuture(uploadFileToS3Bucket(new File(fileName.get().trim()))))
                 .subscribeOn(Schedulers.boundedElastic())
                 .then();
     }
@@ -55,13 +56,14 @@ public class FileService {
     private CompletableFuture<PutObjectResponse> uploadFileToS3Bucket(final File file) {
         return asyncClient.putObject(PutObjectRequest.builder()
                 .bucket(bucket)
-                .key(file.getName())
+                .key(file.getName().replace(" ", "_"))
                 .build(), AsyncRequestBody.fromFile(file));
     }
 
-    public void makeDirectory() {
+    public void makeDirectory(String path) {
         try {
-            Files.createDirectory(Path.of(temp)).toAbsolutePath();
+            if(!Files.exists(Paths.get(path)))
+                Files.createDirectory(Path.of(path)).toAbsolutePath();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -98,5 +100,13 @@ public class FileService {
                             .build());
                     totalFileSize.addAndGet(Math.toIntExact(file.size()));
                 });
+    }
+
+    public Mono<Void> getObject(String objectKey) {
+        makeDirectory(downloadPath);
+        return Mono.just(asyncClient.getObject(GetObjectRequest.builder()
+                .bucket(bucket)
+                .key(objectKey)
+                .build(), Paths.get(downloadPath))).then();
     }
 }

@@ -107,6 +107,6 @@ public class FileService {
         return Mono.just(asyncClient.getObject(GetObjectRequest.builder()
                 .bucket(bucket)
                 .key(objectKey)
-                .build(), Paths.get(downloadPath))).then();
+                .build(), Paths.get(downloadPath + File.separator + objectKey))).then();
     }
 }

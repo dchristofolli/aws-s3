@@ -51,7 +51,7 @@ public class FileService {
                     fileName.set(temp + File.separator + (filePart.filename()));
                     return filePart.transferTo(new File(temp + File.separator + filePart.filename()));
                 })
-                .map(v -> Mono.fromFuture(uploadFileToS3Bucket(new File(fileName.get().trim()))))
+                .map(v -> Mono.fromFuture(uploadFileToS3Bucket(new File(fileName.get()))))
                 .subscribeOn(Schedulers.boundedElastic())
                 .then();
     }
@@ -108,6 +108,8 @@ public class FileService {
     }
 
     public Mono<Void> getObject(String objectKey) {
+        if(fileNotExists(objectKey))
+            throw new NotFoundException("File not exists", HttpStatus.NOT_FOUND);
         makeDirectory(downloadPath);
         return Mono.just(
                 s3AsyncClient.getObject(GetObjectRequest.builder()
@@ -118,7 +120,7 @@ public class FileService {
     }
 
     public Mono<Void> deleteFile(String fileName) {
-        if(!fileExists(fileName))
+        if(fileNotExists(fileName))
             throw new NotFoundException("File not exists", HttpStatus.NOT_FOUND);
         return Mono.just(s3AsyncClient
                 .deleteObject(DeleteObjectRequest.builder()
@@ -128,12 +130,12 @@ public class FileService {
                 .then();
     }
 
-    public boolean fileExists(String fileName) {
+    public boolean fileNotExists(String fileName) {
         return s3AsyncClient
                 .listObjectsV2(getObjectsRequest())
                 .join()
                 .contents()
                 .parallelStream()
-                .anyMatch(s3Object -> s3Object.key().equals(fileName));
+                .noneMatch(s3Object -> s3Object.key().equals(fileName));
     }
 }

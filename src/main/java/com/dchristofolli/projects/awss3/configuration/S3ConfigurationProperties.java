@@ -12,11 +12,6 @@ import static com.dchristofolli.projects.awss3.configuration.RootKeyReader.getRo
 public class S3ConfigurationProperties {
     private Region region = Region.SA_EAST_1;
 
-//    @Value("${aws.s3.uri}")
-//    private String uri;
-//
-//    private URI endpoint = URI.create(uri);
-
     private String accessKeyId = getRootKey().getAWSAccessKeyId();
 
     private String secretAccessKey = getRootKey().getAWSSecretKey();

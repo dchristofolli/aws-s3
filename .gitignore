@@ -6,7 +6,7 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 src/main/resources/application.yml
-Downloads
+downloads
 temp_files
 rootkey.csv
 

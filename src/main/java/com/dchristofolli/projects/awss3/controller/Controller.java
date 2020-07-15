@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RequiredArgsConstructor
@@ -16,8 +17,8 @@ public class Controller {
 
     @PostMapping(path = "/upload")
     @ResponseStatus(HttpStatus.CREATED)
-    public Mono<Void> uploadFile(@RequestPart(value = "file") Mono<FilePart> filePartMono) {
-        return fileService.uploadFile(filePartMono);
+    public Mono<Void> uploadFile(@RequestPart(value = "file") Flux<FilePart> filePartFlux) {
+        return fileService.uploadFile(filePartFlux);
     }
 
     @GetMapping("/list")
@@ -36,9 +37,9 @@ public class Controller {
         return fileService.deleteFile(fileName);
     }
 
-    @DeleteMapping("/delete")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public Mono<Void> deleteAll() {
-        return fileService.deleteAllFiles();
-    }
+//    @DeleteMapping("/delete")
+//    @ResponseStatus(HttpStatus.NO_CONTENT)
+//    public Mono<Void> deleteAll() {
+//        return fileService.deleteAllFiles();
+//    }
 }

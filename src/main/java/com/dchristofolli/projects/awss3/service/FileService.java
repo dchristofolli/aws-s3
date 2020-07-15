@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 import software.amazon.awssdk.core.async.AsyncRequestBody;
@@ -40,10 +41,10 @@ public class FileService {
     private final String downloadPath;
 
 
-    public Mono<Void> uploadFile(final Mono<FilePart> filePartMono) {
+    public Mono<Void> uploadFile(final Flux<FilePart> filePartFlux) {
         makeDirectory(temp);
         AtomicReference<String> fileName = new AtomicReference<>();
-        return filePartMono
+        return filePartFlux
                 .map(filePart -> {
                     fileName.set(temp + File.separator + (filePart.filename()));
                     return filePart.transferTo(new File(temp + File.separator + filePart.filename()));
@@ -71,7 +72,7 @@ public class FileService {
 
     public Mono<ResponseModel> listAll() {
         ListObjectsV2Request listing = getObjectsRequest();
-       ListObjectsV2Response result = s3AsyncClient.listObjectsV2(listing).join();
+        ListObjectsV2Response result = s3AsyncClient.listObjectsV2(listing).join();
         List<FileModel> fileList = new ArrayList<>();
         AtomicInteger totalFileSize = new AtomicInteger();
         int keyCount = result.keyCount();
@@ -91,7 +92,9 @@ public class FileService {
                 .build();
     }
 
-    private void getFileProperties(ListObjectsV2Response response, List<FileModel> fileList, AtomicInteger totalFileSize) {
+    private void getFileProperties(ListObjectsV2Response response,
+                                   List<FileModel> fileList,
+                                   AtomicInteger totalFileSize) {
         response.contents()
                 .forEach(file -> {
                     fileList.add(FileModel.builder()
@@ -113,14 +116,21 @@ public class FileService {
     }
 
     public Mono<Void> deleteFile(String fileName) {
-        return Mono.just(s3AsyncClient.deleteObject(DeleteObjectRequest.builder()
-                .bucket(bucket)
-                .key(fileName)
-                .build()))
+        return Mono.just(s3AsyncClient
+                .deleteObject(DeleteObjectRequest.builder()
+                        .bucket(bucket)
+                        .key(fileName)
+                        .build()))
                 .then();
     }
 
-    public Mono<Void> deleteAllFiles() {
-        return null;
+    public Mono<Boolean> fileExists(String fileName) {
+        return Mono.just(s3AsyncClient
+                .listObjectsV2(getObjectsRequest())
+                .join()
+                .contents()
+                .contains(S3Object.builder()
+                        .key(fileName)
+                        .build()));
     }
 }

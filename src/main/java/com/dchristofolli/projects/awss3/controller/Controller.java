@@ -36,4 +36,9 @@ public class Controller {
     public Mono<Void> deleteFile(@PathVariable String fileName) {
         return fileService.deleteFile(fileName);
     }
+
+    @GetMapping("/exists/{fileName}")
+    public Mono<Boolean> fileExists(@PathVariable String fileName){
+        return fileService.fileExists(fileName);
+    }
 }

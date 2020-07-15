@@ -1,10 +1,12 @@
 package com.dchristofolli.projects.awss3.service;
 
+import com.dchristofolli.projects.awss3.exception.NotFoundException;
 import com.dchristofolli.projects.awss3.model.FileModel;
 import com.dchristofolli.projects.awss3.model.ResponseModel;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -116,6 +118,8 @@ public class FileService {
     }
 
     public Mono<Void> deleteFile(String fileName) {
+        if(!fileExists(fileName))
+            throw new NotFoundException("File not exists", HttpStatus.NOT_FOUND);
         return Mono.just(s3AsyncClient
                 .deleteObject(DeleteObjectRequest.builder()
                         .bucket(bucket)
@@ -124,13 +128,12 @@ public class FileService {
                 .then();
     }
 
-    public Mono<Boolean> fileExists(String fileName) {
-        return Mono.just(s3AsyncClient
+    public boolean fileExists(String fileName) {
+        return s3AsyncClient
                 .listObjectsV2(getObjectsRequest())
                 .join()
                 .contents()
-                .contains(S3Object.builder()
-                        .key(fileName)
-                        .build()));
+                .parallelStream()
+                .anyMatch(s3Object -> s3Object.key().equals(fileName));
     }
 }

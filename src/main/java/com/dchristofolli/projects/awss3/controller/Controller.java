@@ -17,8 +17,8 @@ public class Controller {
 
     @PostMapping(path = "/upload")
     @ResponseStatus(HttpStatus.CREATED)
-    public Mono<Void> uploadFile(@RequestPart(value = "file") Flux<FilePart> filePartFlux) {
-        return fileService.uploadFile(filePartFlux);
+    public Mono<Void> uploadFiles(@RequestPart(value = "file") Flux<FilePart> filePartFlux) {
+        return fileService.uploadFiles(filePartFlux);
     }
 
     @GetMapping("/list")
@@ -36,10 +36,4 @@ public class Controller {
     public Mono<Void> deleteFile(@PathVariable String fileName) {
         return fileService.deleteFile(fileName);
     }
-
-//    @DeleteMapping("/delete")
-//    @ResponseStatus(HttpStatus.NO_CONTENT)
-//    public Mono<Void> deleteAll() {
-//        return fileService.deleteAllFiles();
-//    }
 }

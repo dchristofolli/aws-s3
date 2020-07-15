@@ -41,7 +41,7 @@ public class FileService {
     private final String downloadPath;
 
 
-    public Mono<Void> uploadFile(final Flux<FilePart> filePartFlux) {
+    public Mono<Void> uploadFiles(final Flux<FilePart> filePartFlux) {
         makeDirectory(temp);
         AtomicReference<String> fileName = new AtomicReference<>();
         return filePartFlux
@@ -61,7 +61,7 @@ public class FileService {
                 .build(), AsyncRequestBody.fromFile(file));
     }
 
-    public void makeDirectory(String path) {
+    private void makeDirectory(String path) {
         try {
             if (!Files.exists(Paths.get(path)))
                 Files.createDirectory(Path.of(path)).toAbsolutePath();

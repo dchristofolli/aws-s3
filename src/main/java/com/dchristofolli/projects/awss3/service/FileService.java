@@ -42,7 +42,6 @@ public class FileService {
     @Value("${path.downloads}")
     private final String downloadPath;
 
-
     public Mono<Void> uploadFiles(final Flux<FilePart> filePartFlux) {
         makeDirectory(temp);
         AtomicReference<String> fileName = new AtomicReference<>();
@@ -54,22 +53,6 @@ public class FileService {
                 .map(v -> Mono.fromFuture(uploadFileToS3Bucket(new File(fileName.get()))))
                 .subscribeOn(Schedulers.boundedElastic())
                 .then();
-    }
-
-    private CompletableFuture<PutObjectResponse> uploadFileToS3Bucket(final File file) {
-        return s3AsyncClient.putObject(PutObjectRequest.builder()
-                .bucket(bucket)
-                .key(file.getName().replace(" ", "_"))
-                .build(), AsyncRequestBody.fromFile(file));
-    }
-
-    private void makeDirectory(String path) {
-        try {
-            if (!Files.exists(Paths.get(path)))
-                Files.createDirectory(Path.of(path)).toAbsolutePath();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     public Mono<ResponseModel> listAll() {
@@ -86,25 +69,6 @@ public class FileService {
                 .totalFileSize(fileList.stream()
                         .mapToInt(FileModel::getSize).sum() + " kb")
                 .quantity(keyCount).build());
-    }
-
-    private ListObjectsV2Request getObjectsRequest() {
-        return ListObjectsV2Request.builder()
-                .bucket(bucket)
-                .build();
-    }
-
-    private void getFileProperties(ListObjectsV2Response response,
-                                   List<FileModel> fileList,
-                                   AtomicInteger totalFileSize) {
-        response.contents()
-                .forEach(file -> {
-                    fileList.add(FileModel.builder()
-                            .fileName(file.key())
-                            .size((int) (file.size() / 1024))
-                            .build());
-                    totalFileSize.addAndGet(Math.toIntExact(file.size()));
-                });
     }
 
     public Mono<Void> downloadFile(String objectKey) {
@@ -128,6 +92,41 @@ public class FileService {
                         .key(fileName)
                         .build()))
                 .then();
+    }
+
+    private void makeDirectory(String path) {
+        try {
+            if (!Files.exists(Paths.get(path)))
+                Files.createDirectory(Path.of(path)).toAbsolutePath();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private CompletableFuture<PutObjectResponse> uploadFileToS3Bucket(final File file) {
+        return s3AsyncClient.putObject(PutObjectRequest.builder()
+                .bucket(bucket)
+                .key(file.getName().replace(" ", "_"))
+                .build(), AsyncRequestBody.fromFile(file));
+    }
+
+    private void getFileProperties(ListObjectsV2Response response,
+                                   List<FileModel> fileList,
+                                   AtomicInteger totalFileSize) {
+        response.contents()
+                .forEach(file -> {
+                    fileList.add(FileModel.builder()
+                            .fileName(file.key())
+                            .size((int) (file.size() / 1024))
+                            .build());
+                    totalFileSize.addAndGet(Math.toIntExact(file.size()));
+                });
+    }
+
+    private ListObjectsV2Request getObjectsRequest() {
+        return ListObjectsV2Request.builder()
+                .bucket(bucket)
+                .build();
     }
 
     private boolean fileNotExists(String fileName) {

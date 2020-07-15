@@ -28,7 +28,7 @@ public class Controller {
 
     @GetMapping("/download/{objectKey}")
     public Mono<Void> downloadFile(@PathVariable String objectKey) {
-        return fileService.getObject(objectKey);
+        return fileService.downloadFile(objectKey);
     }
 
     @DeleteMapping("delete/{fileName}")

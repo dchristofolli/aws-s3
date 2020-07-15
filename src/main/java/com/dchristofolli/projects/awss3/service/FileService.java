@@ -107,8 +107,8 @@ public class FileService {
                 });
     }
 
-    public Mono<Void> getObject(String objectKey) {
-        if(fileNotExists(objectKey))
+    public Mono<Void> downloadFile(String objectKey) {
+        if (fileNotExists(objectKey))
             throw new NotFoundException("File not exists", HttpStatus.NOT_FOUND);
         makeDirectory(downloadPath);
         return Mono.just(
@@ -120,7 +120,7 @@ public class FileService {
     }
 
     public Mono<Void> deleteFile(String fileName) {
-        if(fileNotExists(fileName))
+        if (fileNotExists(fileName))
             throw new NotFoundException("File not exists", HttpStatus.NOT_FOUND);
         return Mono.just(s3AsyncClient
                 .deleteObject(DeleteObjectRequest.builder()
@@ -130,7 +130,7 @@ public class FileService {
                 .then();
     }
 
-    public boolean fileNotExists(String fileName) {
+    private boolean fileNotExists(String fileName) {
         return s3AsyncClient
                 .listObjectsV2(getObjectsRequest())
                 .join()

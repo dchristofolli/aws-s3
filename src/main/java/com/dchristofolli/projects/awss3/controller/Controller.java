@@ -15,6 +15,9 @@ import reactor.core.publisher.Mono;
 public class Controller {
     private final FileService fileService;
 
+    //todo criar rotina de limpeza da pasta temp
+    //todo fazer a pasta downloads apontar para a pasta downloads do usuário
+
     @PostMapping("/upload")
     @ResponseStatus(HttpStatus.CREATED)
     public Mono<Void> uploadFiles(@RequestPart(value = "file") Flux<FilePart> filePartFlux) {
@@ -36,10 +39,5 @@ public class Controller {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public Mono<Void> deleteFile(@PathVariable String fileName) {
         return fileService.deleteFile(fileName);
-    }
-
-    @PostMapping("/bucket/{bucketName}")
-    public Mono<Void> createBucket(@PathVariable String bucketName) {
-        return fileService.createBucket(bucketName);
     }
 }

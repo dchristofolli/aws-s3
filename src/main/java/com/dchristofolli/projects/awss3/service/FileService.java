@@ -103,14 +103,6 @@ public class FileService {
         }
     }
 
-    public Mono<Void> createBucket(String bucketName) {
-        CreateBucketRequest create = CreateBucketRequest.builder()
-                .bucket(bucketName)
-                .build();
-        return Mono.just(s3AsyncClient
-                .createBucket(create)).then();
-    }
-
     private CompletableFuture<PutObjectResponse> uploadFileToS3Bucket(File file) {
         String fileName = file.getName()
                 .replace(" ", "_")

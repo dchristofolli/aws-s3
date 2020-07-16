@@ -18,10 +18,11 @@ public class Controller {
     //todo criar rotina de limpeza da pasta temp
     //todo fazer a pasta downloads apontar para a pasta downloads do usuário
 
-    @PostMapping("/upload")
+    @PostMapping("/upload/{folder}")
     @ResponseStatus(HttpStatus.CREATED)
-    public Mono<Void> uploadFiles(@RequestPart(value = "file") Flux<FilePart> filePartFlux) {
-        return fileService.uploadFiles(filePartFlux);
+    public Mono<Void> uploadFiles(@PathVariable("folder") String applicantId,
+                                  @RequestPart(value = "file") Flux<FilePart> filePartFlux) {
+        return fileService.uploadFiles(applicantId, filePartFlux);
     }
 
     @GetMapping("/list")
@@ -35,9 +36,10 @@ public class Controller {
         return fileService.downloadFile(applicantFolder, fileKey);
     }
 
-    @DeleteMapping("/delete/{fileName}")
+    @DeleteMapping("/delete/{folder}/{file}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public Mono<Void> deleteFile(@PathVariable String fileName) {
-        return fileService.deleteFile(fileName);
+    public Mono<Void> deleteFile(@PathVariable("folder") String applicantId,
+                                 @PathVariable("file") String fileName) {
+        return fileService.deleteFile(applicantId, fileName);
     }
 }

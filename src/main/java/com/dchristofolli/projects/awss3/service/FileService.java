@@ -44,7 +44,7 @@ public class FileService {
 
     private static final String KEY_SEPARATOR = "/";
 
-    public Mono<Void> uploadFiles(final Flux<FilePart> filePartFlux) {
+    public Mono<Void> uploadFiles(String folder, final Flux<FilePart> filePartFlux) {
         makeLocalDirectory(temp);
         AtomicReference<String> fileName = new AtomicReference<>();
         return filePartFlux
@@ -52,7 +52,7 @@ public class FileService {
                     fileName.set(temp + File.separator + (filePart.filename()));
                     return filePart.transferTo(new File(temp + File.separator + filePart.filename()));
                 })
-                .map(v -> Mono.fromFuture(uploadFileToS3Bucket(new File(fileName.get()))))
+                .map(v -> Mono.fromFuture(uploadFileToS3Bucket(folder, new File(fileName.get()))))
                 .subscribeOn(Schedulers.boundedElastic())
                 .then();
     }
@@ -85,11 +85,11 @@ public class FileService {
                 .then();
     }
 
-    public Mono<Void> deleteFile(String fileName) {
+    public Mono<Void> deleteFile(String applicantId, String fileName) {
         return Mono.just(s3AsyncClient
                 .deleteObject(DeleteObjectRequest.builder()
                         .bucket(bucket)
-                        .key(fileName)
+                        .key(applicantId + KEY_SEPARATOR + fileName)
                         .build()))
                 .then();
     }
@@ -103,11 +103,11 @@ public class FileService {
         }
     }
 
-    private CompletableFuture<PutObjectResponse> uploadFileToS3Bucket(File file) {
+    private CompletableFuture<PutObjectResponse> uploadFileToS3Bucket(String folder, File file) {
         String fileName = file.getName()
                 .replace(" ", "_")
                 .replace("/", "_");
-        String keyName = "test_dir" + KEY_SEPARATOR + fileName;
+        String keyName = folder + KEY_SEPARATOR + fileName;
         return s3AsyncClient.putObject(PutObjectRequest.builder()
                 .bucket(bucket)
                 .key(keyName)
@@ -139,6 +139,6 @@ public class FileService {
                 .join()
                 .contents()
                 .parallelStream()
-                .noneMatch(s3Object -> s3Object.key().equals(folderName + KEY_SEPARATOR +fileName));
+                .noneMatch(s3Object -> s3Object.key().equals(folderName + KEY_SEPARATOR + fileName));
     }
 }

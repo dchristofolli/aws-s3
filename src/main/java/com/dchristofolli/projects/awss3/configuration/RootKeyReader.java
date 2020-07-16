@@ -27,7 +27,6 @@ public class RootKeyReader {
         }
         return new CsvToBeanBuilder<RootKeyModel>(Objects.requireNonNull(reader))
                 .withType(RootKeyModel.class)
-                .withSeparator(';')
                 .build()
                 .parse().stream()
                 .findFirst()

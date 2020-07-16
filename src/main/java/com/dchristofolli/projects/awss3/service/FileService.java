@@ -99,12 +99,12 @@ public class FileService {
     public Mono<Void> downloadFile(String applicantFolder, String fileKey) {
         if (fileNotExists(applicantFolder, fileKey))
             throw new NotFoundException("File not exists", HttpStatus.NOT_FOUND);
-        makeLocalDirectory(downloadPath);
+        makeLocalDirectory(downloadPath + File.separator + applicantFolder);
         return Mono.just(
                 s3AsyncClient.getObject(GetObjectRequest.builder()
                         .bucket(bucket)
                         .key(applicantFolder + KEY_SEPARATOR + fileKey)
-                        .build(), Paths.get(downloadPath, fileKey)))
+                        .build(), Paths.get(downloadPath, applicantFolder, fileKey)))
                 .then();
     }
 

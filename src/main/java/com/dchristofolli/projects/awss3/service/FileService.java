@@ -2,6 +2,7 @@ package com.dchristofolli.projects.awss3.service;
 
 import com.dchristofolli.projects.awss3.exception.NotFoundException;
 import com.dchristofolli.projects.awss3.model.FileModel;
+import com.dchristofolli.projects.awss3.model.FolderModel;
 import com.dchristofolli.projects.awss3.model.ResponseModel;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +27,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -66,11 +68,32 @@ public class FileService {
         getFileProperties(result, fileList, totalFileSize);
         return Mono.just(ResponseModel
                 .builder()
-                .bucketName(bucket)
-                .keys(fileList)
+                .bucket(bucket)
+                .files(fileList)
                 .totalFileSize(fileList.stream()
                         .mapToInt(FileModel::getSize).sum() + " kb")
                 .quantity(keyCount).build());
+    }
+
+    public Mono<FolderModel> listAllByApplicant(String applicantId) {
+        ListObjectsV2Request request = ListObjectsV2Request.builder()
+                .bucket(bucket)
+                .build();
+        List<String> files = s3AsyncClient.listObjectsV2(request)
+                .join().contents()
+                .parallelStream()
+                .filter(s3Object -> s3Object.key().startsWith(applicantId))
+                .map(S3Object::key)
+                .map(s -> {
+                    int init = s.indexOf("/") + 1;
+                    return s.substring(init);
+                })
+                .collect(Collectors.toList());
+        return Mono.just(FolderModel.builder()
+                .folderName(applicantId)
+                .files(files)
+                .quantity(files.size())
+                .build());
     }
 
     public Mono<Void> downloadFile(String applicantFolder, String fileKey) {

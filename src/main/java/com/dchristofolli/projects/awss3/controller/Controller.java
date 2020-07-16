@@ -1,5 +1,6 @@
 package com.dchristofolli.projects.awss3.controller;
 
+import com.dchristofolli.projects.awss3.model.FolderModel;
 import com.dchristofolli.projects.awss3.model.ResponseModel;
 import com.dchristofolli.projects.awss3.service.FileService;
 import lombok.RequiredArgsConstructor;
@@ -25,15 +26,20 @@ public class Controller {
         return fileService.uploadFiles(applicantId, filePartFlux);
     }
 
+    @GetMapping("/list/{folder}")
+    public Mono<FolderModel> findAllByApplicant(@PathVariable("folder") String applicantId) {
+        return fileService.listAllByApplicant(applicantId);
+    }
+
     @GetMapping("/list")
     public Mono<ResponseModel> findAll() {
         return fileService.listAll();
     }
 
     @GetMapping("/download/{folder}/{file}")
-    public Mono<Void> downloadFile(@PathVariable("folder") String applicantFolder,
+    public Mono<Void> downloadFile(@PathVariable("folder") String applicantId,
                                    @PathVariable("file") String fileKey) {
-        return fileService.downloadFile(applicantFolder, fileKey);
+        return fileService.downloadFile(applicantId, fileKey);
     }
 
     @DeleteMapping("/delete/{folder}/{file}")

@@ -7,14 +7,13 @@ import lombok.Data;
 
 import java.util.List;
 
+@Builder
 @AllArgsConstructor
 @Data
-@Builder
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-public class ResponseModel {
-    private String bucket;
-    private FolderModel folder;
-    private List<FileModel> files;
+public class FolderModel {
+    String folderName;
+    List<String> files;
     private Integer quantity;
     private String totalFileSize;
 }

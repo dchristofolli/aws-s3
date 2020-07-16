@@ -42,8 +42,10 @@ public class FileService {
     @Value("${path.downloads}")
     private final String downloadPath;
 
+    private static final String KEY_SEPARATOR = "/";
+
     public Mono<Void> uploadFiles(final Flux<FilePart> filePartFlux) {
-        makeDirectory(temp);
+        makeLocalDirectory(temp);
         AtomicReference<String> fileName = new AtomicReference<>();
         return filePartFlux
                 .map(filePart -> {
@@ -71,21 +73,19 @@ public class FileService {
                 .quantity(keyCount).build());
     }
 
-    public Mono<Void> downloadFile(String objectKey) {
-        if (fileNotExists(objectKey))
+    public Mono<Void> downloadFile(String applicantFolder, String fileKey) {
+        if (fileNotExists(applicantFolder, fileKey))
             throw new NotFoundException("File not exists", HttpStatus.NOT_FOUND);
-        makeDirectory(downloadPath);
+        makeLocalDirectory(downloadPath);
         return Mono.just(
                 s3AsyncClient.getObject(GetObjectRequest.builder()
                         .bucket(bucket)
-                        .key(objectKey)
-                        .build(), Paths.get(downloadPath + File.separator + objectKey)))
+                        .key(applicantFolder + KEY_SEPARATOR + fileKey)
+                        .build(), Paths.get(downloadPath, fileKey)))
                 .then();
     }
 
     public Mono<Void> deleteFile(String fileName) {
-        if (fileNotExists(fileName))
-            throw new NotFoundException("File not exists", HttpStatus.NOT_FOUND);
         return Mono.just(s3AsyncClient
                 .deleteObject(DeleteObjectRequest.builder()
                         .bucket(bucket)
@@ -94,7 +94,7 @@ public class FileService {
                 .then();
     }
 
-    private void makeDirectory(String path) {
+    private void makeLocalDirectory(String path) {
         try {
             if (!Files.exists(Paths.get(path)))
                 Files.createDirectory(Path.of(path)).toAbsolutePath();
@@ -103,10 +103,22 @@ public class FileService {
         }
     }
 
-    private CompletableFuture<PutObjectResponse> uploadFileToS3Bucket(final File file) {
+    public Mono<Void> createBucket(String bucketName) {
+        CreateBucketRequest create = CreateBucketRequest.builder()
+                .bucket(bucketName)
+                .build();
+        return Mono.just(s3AsyncClient
+                .createBucket(create)).then();
+    }
+
+    private CompletableFuture<PutObjectResponse> uploadFileToS3Bucket(File file) {
+        String fileName = file.getName()
+                .replace(" ", "_")
+                .replace("/", "_");
+        String keyName = "test_dir" + KEY_SEPARATOR + fileName;
         return s3AsyncClient.putObject(PutObjectRequest.builder()
                 .bucket(bucket)
-                .key(file.getName().replace(" ", "_"))
+                .key(keyName)
                 .build(), AsyncRequestBody.fromFile(file));
     }
 
@@ -129,12 +141,12 @@ public class FileService {
                 .build();
     }
 
-    private boolean fileNotExists(String fileName) {
+    private boolean fileNotExists(String folderName, String fileName) {
         return s3AsyncClient
                 .listObjectsV2(getObjectsRequest())
                 .join()
                 .contents()
                 .parallelStream()
-                .noneMatch(s3Object -> s3Object.key().equals(fileName));
+                .noneMatch(s3Object -> s3Object.key().equals(folderName + KEY_SEPARATOR +fileName));
     }
 }

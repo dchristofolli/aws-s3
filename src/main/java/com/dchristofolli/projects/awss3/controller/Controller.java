@@ -15,7 +15,7 @@ import reactor.core.publisher.Mono;
 public class Controller {
     private final FileService fileService;
 
-    @PostMapping(path = "/upload")
+    @PostMapping("/upload")
     @ResponseStatus(HttpStatus.CREATED)
     public Mono<Void> uploadFiles(@RequestPart(value = "file") Flux<FilePart> filePartFlux) {
         return fileService.uploadFiles(filePartFlux);
@@ -26,14 +26,20 @@ public class Controller {
         return fileService.listAll();
     }
 
-    @GetMapping("/download/{objectKey}")
-    public Mono<Void> downloadFile(@PathVariable String objectKey) {
-        return fileService.downloadFile(objectKey);
+    @GetMapping("/download/{folder}/{file}")
+    public Mono<Void> downloadFile(@PathVariable("folder") String applicantFolder,
+                                   @PathVariable("file") String fileKey) {
+        return fileService.downloadFile(applicantFolder, fileKey);
     }
 
-    @DeleteMapping("delete/{fileName}")
+    @DeleteMapping("/delete/{fileName}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public Mono<Void> deleteFile(@PathVariable String fileName) {
         return fileService.deleteFile(fileName);
+    }
+
+    @PostMapping("/bucket/{bucketName}")
+    public Mono<Void> createBucket(@PathVariable String bucketName) {
+        return fileService.createBucket(bucketName);
     }
 }

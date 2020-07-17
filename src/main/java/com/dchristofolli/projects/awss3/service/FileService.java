@@ -1,5 +1,6 @@
 package com.dchristofolli.projects.awss3.service;
 
+import com.dchristofolli.projects.awss3.exception.BadRequestException;
 import com.dchristofolli.projects.awss3.exception.NotFoundException;
 import com.dchristofolli.projects.awss3.model.FileModel;
 import com.dchristofolli.projects.awss3.model.FolderModel;
@@ -97,8 +98,11 @@ public class FileService {
     }
 
     public Mono<Void> downloadFile(String applicantFolder, String fileKey) {
-        if (fileNotExists(applicantFolder, fileKey))
+        if (fileNotExistsInBucket(applicantFolder, fileKey))
             throw new NotFoundException("File not exists", HttpStatus.NOT_FOUND);
+        if (Files.exists(Paths.get(downloadPath, applicantFolder, fileKey)))
+            throw new BadRequestException("File already exists.", HttpStatus.BAD_REQUEST);
+        makeLocalDirectory(downloadPath);
         makeLocalDirectory(downloadPath + File.separator + applicantFolder);
         return Mono.just(
                 s3AsyncClient.getObject(GetObjectRequest.builder()
@@ -156,7 +160,7 @@ public class FileService {
                 .build();
     }
 
-    private boolean fileNotExists(String folderName, String fileName) {
+    private boolean fileNotExistsInBucket(String folderName, String fileName) {
         return s3AsyncClient
                 .listObjectsV2(getObjectsRequest())
                 .join()

@@ -52,7 +52,7 @@ public class FileService {
         return Mono.just(s3AsyncClient.createBucket(CreateBucketRequest.builder()
                 .bucket(bucketName)
                 .createBucketConfiguration(CreateBucketConfiguration.builder()
-                        .locationConstraint(Region.US_EAST_1.id())
+                        .locationConstraint(Region.SA_EAST_1.id())
                         .build())
                 .build())).then();
     }
@@ -65,10 +65,10 @@ public class FileService {
                 .collect(Collectors.toList()));
     }
 
-    public Mono<Void> uploadFiles(String folder, final Flux<FilePart> filePartFlux) {
+    public Mono<Void> uploadFiles(String folder, final Mono<FilePart> filePartMono) {
         makeLocalDirectory(temp);
         AtomicReference<String> fileName = new AtomicReference<>();
-        return filePartFlux
+        return filePartMono
                 .map(filePart -> {
                     fileName.set(temp + File.separator + (filePart.filename()));
                     return filePart.transferTo(new File(temp + File.separator + filePart.filename()));
@@ -101,7 +101,8 @@ public class FileService {
         List<String> files = s3AsyncClient.listObjectsV2(request)
                 .join().contents()
                 .parallelStream()
-                .filter(s3Object -> s3Object.key().startsWith(applicantId))
+                .filter(s3Object -> s3Object.key()
+                        .startsWith(applicantId + "/"))
                 .map(S3Object::key)
                 .map(s -> {
                     int init = s.indexOf("/") + 1;

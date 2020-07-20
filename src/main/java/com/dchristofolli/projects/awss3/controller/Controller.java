@@ -24,8 +24,8 @@ public class Controller {
     @PostMapping("/upload/{folder}")
     @ResponseStatus(HttpStatus.CREATED)
     public Mono<Void> uploadFiles(@PathVariable("folder") String applicantId,
-                                  @RequestPart(value = "file") Flux<FilePart> filePartFlux) {
-        return fileService.uploadFiles(applicantId, filePartFlux);
+                                  @RequestPart(value = "file") Mono<FilePart> filePartMono) {
+        return fileService.uploadFiles(applicantId, filePartMono);
     }
 
     @PostMapping("/create/{bucket}")

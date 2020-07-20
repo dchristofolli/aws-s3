@@ -98,10 +98,7 @@ public class FileService {
     }
 
     public Mono<Void> downloadFile(String applicantFolder, String fileKey) {
-        if (fileNotExistsInBucket(applicantFolder, fileKey))
-            throw new NotFoundException("File not exists", HttpStatus.NOT_FOUND);
-        if (Files.exists(Paths.get(downloadPath, applicantFolder, fileKey)))
-            throw new BadRequestException("File already exists.", HttpStatus.BAD_REQUEST);
+        checkFileConsistency(applicantFolder, fileKey);
         makeLocalDirectory(downloadPath);
         makeLocalDirectory(downloadPath + File.separator + applicantFolder);
         return Mono.just(
@@ -110,6 +107,13 @@ public class FileService {
                         .key(applicantFolder + KEY_SEPARATOR + fileKey)
                         .build(), Paths.get(downloadPath, applicantFolder, fileKey)))
                 .then();
+    }
+
+    private void checkFileConsistency(String applicantFolder, String fileKey) {
+        if (fileNotExistsInBucket(applicantFolder, fileKey))
+            throw new NotFoundException("File not exists", HttpStatus.NOT_FOUND);
+        if (Files.exists(Paths.get(downloadPath, applicantFolder, fileKey)))
+            throw new BadRequestException("File already exists.", HttpStatus.BAD_REQUEST);
     }
 
     public Mono<Void> deleteFile(String applicantId, String fileName) {
@@ -131,14 +135,18 @@ public class FileService {
     }
 
     private CompletableFuture<PutObjectResponse> uploadFileToS3Bucket(String folder, File file) {
-        String fileName = file.getName()
-                .replace(" ", "_")
-                .replace("/", "_");
-        String keyName = folder + KEY_SEPARATOR + fileName;
+        String keyName = s3PathMaker(folder, file);
         return s3AsyncClient.putObject(PutObjectRequest.builder()
                 .bucket(bucket)
                 .key(keyName)
                 .build(), AsyncRequestBody.fromFile(file));
+    }
+
+    private String s3PathMaker(String folder, File file) {
+        String fileName = file.getName()
+                .replace(" ", "_")
+                .replace("/", "_");
+        return folder + KEY_SEPARATOR + fileName;
     }
 
     private void getFileProperties(ListObjectsV2Response response,

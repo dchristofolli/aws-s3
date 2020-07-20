@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
+
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/files")
@@ -24,6 +26,17 @@ public class Controller {
     public Mono<Void> uploadFiles(@PathVariable("folder") String applicantId,
                                   @RequestPart(value = "file") Flux<FilePart> filePartFlux) {
         return fileService.uploadFiles(applicantId, filePartFlux);
+    }
+
+    @PostMapping("/create/{bucket}")
+    @ResponseStatus(HttpStatus.CREATED)
+    public Mono<Void> uploadFiles(@PathVariable("bucket") String bucketName) {
+        return fileService.createBucket(bucketName);
+    }
+
+    @GetMapping("/list-buckets")
+    public Flux<List<String>> findAllBuckets() {
+        return fileService.listAllBuckets();
     }
 
     @GetMapping("/list/{folder}")

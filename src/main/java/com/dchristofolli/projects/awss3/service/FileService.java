@@ -15,6 +15,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 import software.amazon.awssdk.core.async.AsyncRequestBody;
+import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3AsyncClient;
 import software.amazon.awssdk.services.s3.model.*;
 
@@ -46,6 +47,23 @@ public class FileService {
     private final String downloadPath;
 
     private static final String KEY_SEPARATOR = "/";
+
+    public Mono<Void> createBucket(String bucketName) {
+        return Mono.just(s3AsyncClient.createBucket(CreateBucketRequest.builder()
+                .bucket(bucketName)
+                .createBucketConfiguration(CreateBucketConfiguration.builder()
+                        .locationConstraint(Region.US_EAST_1.id())
+                        .build())
+                .build())).then();
+    }
+
+    public Flux<List<String>> listAllBuckets() {
+        return Flux.just(s3AsyncClient.listBuckets(ListBucketsRequest.builder()
+                .build()).join()
+                .buckets().parallelStream()
+                .map(Bucket::name)
+                .collect(Collectors.toList()));
+    }
 
     public Mono<Void> uploadFiles(String folder, final Flux<FilePart> filePartFlux) {
         makeLocalDirectory(temp);
